@@ -91,7 +91,7 @@ def process_workspace(ws_guid):
 def main():
     parser = argparse.ArgumentParser(
         description='This script exports licenses for the libraries in the specified workspace(s).')
-    parser.add_argument('-w', '--workspace', required=False, help='Workspace guid to check for library licenses.',default='7ac1fcd4-89c7-4f2e-808c-157a232c58d9')
+    parser.add_argument('-w', '--workspace', required=False, help='Workspace guid to check for library licenses.')
     parser.add_argument('--all', '-l',action='store_true', help='Set to report for library licenses for all workspaces.',default=False)
     parser.add_argument('--prompt', '-p',action='store_true', help='Prompts for name of the workspace to check for library licenses.')
     args = parser.parse_args()
