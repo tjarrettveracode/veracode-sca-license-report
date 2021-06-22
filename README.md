@@ -4,6 +4,8 @@ Get a CSV report of the licenses for the libraries in your Veracode SCA Agent wo
 
 ## Setup
 
+NOTE: This script requires Python 3!
+
 Clone this repository:
 
     git clone https://github.com/tjarrettveracode/veracode-sca-license-report
