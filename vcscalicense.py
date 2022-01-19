@@ -7,6 +7,7 @@ import csv
 from urllib import parse
 
 import anticrlf
+from requests import RequestException
 from veracode_api_py import VeracodeAPI as vapi, Workspaces
 
 log = logging.getLogger(__name__)
@@ -37,7 +38,12 @@ def get_licenses_for_libraries(libraries):
         status = 'Getting license information for library {}'.format(lib['id'])
         print(status)
         log.info(status)
-        lib_detail = Workspaces().get_library(lib['id'])
+        try:
+            lib_detail = Workspaces().get_library(lib['id'])
+            # print(lib_detail)
+        except RequestException as requestException:
+            print(requestException)
+            pass
         all_licenses.append(lib_detail)
     return all_licenses
 
@@ -51,10 +57,32 @@ def write_licenses_to_csv(ws_licenses):
         w = csv.DictWriter(f, fields)
         w.writeheader()
         for k in ws_licenses:
-            w.writerow({'workspace_id': '','workspace_name': '','library_id': k['id'], 
-                        'library_name': k['name'], 'version': k['version'], 
-                        'license_name': k['licenses'][0]['name'], 
-                        'license_risk': k['licenses'][0]['risk'] })
+            try:
+                # If this library has 0 licenses, write blank strings for the license name and risk
+                if not k['licenses']:
+                    # print(f"For library {k} the license array is empty")
+                    lic_status = 'For library {} the license array is empty'.format(k['name'])
+                    print(lic_status)
+                    w.writerow({'workspace_id': '','workspace_name': '','library_id': k['id'],
+                                'library_name': k['name'], 'version': k['version'],
+                                'license_name': '',
+                                'license_risk': ''})
+                # print(f"The license list for library {k} has {len(k['licenses'])} elements")
+                lic_status = 'The license list for library {} has {} elements'.format(k['name'],len(k['licenses']))
+                print(lic_status)
+                # Iterate through the licenses for the current library and write a csv record for each one.
+                for license in k['licenses']:
+                    w.writerow({'workspace_id': '','workspace_name': '','library_id': k['id'],
+                                'library_name': k['name'], 'version': k['version'],
+                                'license_name': license['name'],
+                                'license_risk': license['risk'] })
+            except IndexError:
+                libid = k['id']
+                print("Completed with errors, issues on library ID", libid)
+                w.writerow({'workspace_id': '', 'workspace_name': '', 'library_id': k['id'],
+                            'library_name': k['name'], 'version': k['version'],
+                            'license_name': '',
+                            'license_risk': ''})
 
 
 def prompt_for_workspace(prompt_text):
